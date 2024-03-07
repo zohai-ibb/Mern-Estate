@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import { app } from '../firebase';
-import { updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess } from '../redux/user/userSlice';
+import { updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserFailure, signOutUserSuccess, signOutUserStart } from '../redux/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
@@ -44,10 +44,10 @@ export default function Profile() {
   }
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.id]: e.target.value })    
+    setFormData({ ...formData, [e.target.id]: e.target.value })
   }
 
-  const handleSubmit = async (e) =>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       dispatch(updateUserStart());
@@ -60,7 +60,7 @@ export default function Profile() {
       });
 
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(updateUserFailure(data.message))
         return;
       }
@@ -73,14 +73,14 @@ export default function Profile() {
     }
   }
 
-  const handleDeleteUser = async () =>{
+  const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: 'DELETE',
       });
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(deleteUserFailure(data.message));
         return;
       }
@@ -90,6 +90,23 @@ export default function Profile() {
       deleteUserFailure(error.message);
     }
   }
+
+  const handleSignedOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch('/api/auth/signout');
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
+      dispatch(signOutUserSuccess(data));
+      // Redirect user or perform necessary actions upon successful sign out
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
+    }
+  }
+  
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
@@ -111,14 +128,14 @@ export default function Profile() {
         <input type="text" placeholder='Username' defaultValue={currentUser.username} onChange={handleChange} id='username' className='border p-3 m-1 rounded-lg' />
         <input type="text" placeholder='Email' defaultValue={currentUser.email} onChange={handleChange} id='email' className='border p-3 m-1 rounded-lg' />
         <input type="password" placeholder='Password' onChange={handleChange} id='password' className='border m-1 p-3 rounded-lg' />
-        <button disabled={loading} className='mt-2 bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80'>{loading ? "Loading...": "Update"}</button>
+        <button disabled={loading} className='mt-2 bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80'>{loading ? "Loading..." : "Update"}</button>
       </form>
       <div className='flex justify-between mt-5'>
         <span onClick={handleDeleteUser} className='text-red-700 cursor-pointer'>Delete account</span>
-        <span className='text-red-700 cursor-pointer'>Sign out</span>
+        <span onClick={handleSignedOut} className='text-red-700 cursor-pointer'>Sign out</span>
       </div>
-      <p className='text-red-700 mt-5'>{error? error: ""}</p>         
-      <p className='text-green-700 mt-5'>{updateSuccess ? "Updated Successfully!" : ""}</p>         
+      <p className='text-red-700 mt-5'>{error ? error : ""}</p>
+      <p className='text-green-700 mt-5'>{updateSuccess ? "Updated Successfully!" : ""}</p>
     </div>
   )
 }
