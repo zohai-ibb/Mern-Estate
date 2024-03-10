@@ -1,16 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 import { app } from "../firebase";
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
 export default function CreateListing() {
   const [files, setFiles] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { currentUser } = useSelector(state => state.user)
+  const { currentUser } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({
-
     imageUrls: [],
     name: "",
     description: "",
@@ -61,36 +65,36 @@ export default function CreateListing() {
     }
   };
 
-  const handleSubmit = async (e) =>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if(formData.imageUrls.length < 1) return setError("You must upload atleast one image");
-      if(+formData.regularPrice < +formData.discountPrice) return setError('Discount price must be lower than regular price')
-      setLoading(true)
-      setError(false)
-      const res = await fetch('/api/listing/create', {
+      if (formData.imageUrls.length < 1)
+        return setError("You must upload atleast one image");
+      if (+formData.regularPrice < +formData.discountPrice)
+        return setError("Discount price must be lower than regular price");
+      setLoading(true);
+      setError(false);
+      const res = await fetch("/api/listing/create", {
         method: "POST",
-        headers:{
-          'Content-Type': 'application/json'
+        headers: {
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...formData,
           userRef: currentUser._id,
-
         }),
-      })
+      });
       const data = await res.json();
       setLoading(false);
-      if(data.success == false){
+      if (data.success == false) {
         setError(data.message);
       }
-      navigate(`listing/${data._id}`)
+      navigate(`listing/${data._id}`);
     } catch (error) {
       setError(error.message);
       setLoading(false);
     }
-
-  }
+  };
 
   const handleImageSubmit = (e) => {
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
@@ -280,27 +284,30 @@ export default function CreateListing() {
               />
               <div className="flex flex-col items-center">
                 <p>Regular price</p>
-                <span className="text-xs">(Rs / month)</span>
+                {formData.type === "rent" && (
+                  <span className="text-xs">(Rs / month)</span>
+                )}
               </div>
             </div>
             {formData.offer && (
-              
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="discountPrice"
-                min="0"
-                max="10000000"
-                required
-                className="p-1 border border-gray-300 rounded-lg"
-                onChange={handleChange}
-                value={formData.discountPrice}
-              />
-              <div className="flex flex-col items-center">
-                <p>Discounted price</p>
-                <span className="text-xs">(Rs / month)</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  id="discountPrice"
+                  min="0"
+                  max="10000000"
+                  required
+                  className="p-1 border border-gray-300 rounded-lg"
+                  onChange={handleChange}
+                  value={formData.discountPrice}
+                />
+                <div className="flex flex-col items-center">
+                  <p>Discounted price</p>
+                  {formData.type === "rent" && (
+                    <span className="text-xs">($ / month)</span>
+                  )}
+                </div>
               </div>
-            </div>
             )}
           </div>
         </div>
@@ -348,8 +355,11 @@ export default function CreateListing() {
                 </button>
               </div>
             ))}
-          <button disabled={uploading || loading} className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80">
-            {loading? 'Creating...' : "Create Listing"}
+          <button
+            disabled={uploading || loading}
+            className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+          >
+            {loading ? "Creating..." : "Create Listing"}
           </button>
           {error && <p className="text-red-700 text-sm">{error}</p>}
         </div>
