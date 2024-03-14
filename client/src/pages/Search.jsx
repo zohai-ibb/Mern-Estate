@@ -98,7 +98,7 @@ export default function Search() {
 
     }
 
-    fetchListing();
+    fetchListing(); 
 
   }, [location.search]);
 
