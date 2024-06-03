@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Contact({ listing }) {
   const [landlord, setLandlord] = useState(null);
   const [message, setMessage] = useState("");
+
   const onChange = (e) => {
     setMessage(e.target.value);
   };
@@ -20,6 +21,19 @@ export default function Contact({ listing }) {
     };
     fetchLandlord();
   }, [listing.userRef]);
+
+  const openEmailComposer = () => {
+    if (landlord) {
+      const emailLink = `mailto:${landlord.email}?subject=Regarding ${listing.name}&body=${message}`;
+      console.log("Email link:", emailLink); // Debugging
+      window.open(emailLink, "_blank");
+    } else {
+      console.log("Landlord data is not yet available."); // Debugging
+    }
+  };
+
+  console.log("Landlord:", landlord); // Debugging
+
   return (
     <>
       {landlord && (
@@ -39,12 +53,12 @@ export default function Contact({ listing }) {
             className="w-full border p-3 rounded-lg"
           ></textarea>
 
-          <Link
-            to={`mailto:${landlord.email}?subject=Regarding ${listing.name}&body=${message}`}
+          <button
+            onClick={openEmailComposer}
             className="bg-slate-700 text-white text-center p-3 uppercase rounded-lg hover:opacity-95"
           >
             Send Message
-          </Link>
+          </button>
         </div>
       )}
     </>

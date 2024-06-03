@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon api/index.js",
-    "start": "node api/index.js"
+    "start": "node api/index.js",
+    "build": "npm install && npm install --prefix client && npm run built --prefix client"
   },
   "keywords": [],
   "author": "",
@@ -21,5 +22,8 @@
     "nodemon": "^3.1.0",
     "redux-persist": "^6.0.0",
     "swiper": "^11.0.7"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
   }
 }
